@@ -9,7 +9,14 @@ Connect to database
 ```python
 from data_handler import Database
 
-Database.connect(host='localhost', port=3306, user='root', passwd='123456')
+_db_config = {
+    'host': 'localhost',
+    'port': 3306,
+    'user': 'root',
+    'password': '123456',
+    'database': 'test'
+}
+Database.connect(**_db_config)
 ```
 
 Define a model
