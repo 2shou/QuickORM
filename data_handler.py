@@ -105,34 +105,5 @@ class Database(object):
             self.conn.close()
 
 
-if __name__ == '__main__':
-    # connect database
-    _db_config = {
-        'host': 'localhost',
-        'port': 3306,
-        'user': 'root',
-        'password': '123456',
-        'database': 'test'
-    }
-    Database.connect(**_db_config)
-
-    # define model
-    class TestModel(Model):
-        db_table = 'test'  # point table name
-        a = Field()
-        b = Field()
-
-    # create instance
-    test = TestModel()
-    test.a = 'john'
-    test.b = 3
-    test.save()
-
-    # select
-    for r in TestModel.where(a='john', b=3).select():
-        print type(r)
-        print r.a
-        print r.b
-
-    # update
-    TestModel.where(a='john', b=3).update(b=1)
+def execute_raw_sql(sql, params=None):
+    return Database.execute(sql, params) if params else Database.execute(sql)

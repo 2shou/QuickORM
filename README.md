@@ -8,6 +8,7 @@ Connect to database
 
 ```python
 from data_handler import Database
+
 Database.connect(host='localhost', port=3306, user='root', passwd='123456')
 ```
 
@@ -15,6 +16,8 @@ Define a model
 --------------
 
 ```python
+from data_handler import Model, Field
+
 class TestModel(Model):
   db_table = 'test'
   a = Field()
@@ -52,4 +55,15 @@ Update
 
 ```python
 TestModel.where(a=5, b='john').update(a=1)
+```
+
+Execute raw SQL
+---------------
+
+```python
+from data_handler import execute_raw_sql
+
+results = execute_raw_sql('select b, count(*) from test where b = %s group by b;', (1,))
+for val, cnt in results:
+  print val, cnt
 ```
