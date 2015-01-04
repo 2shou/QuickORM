@@ -1,14 +1,14 @@
 from data_handler import Database, Model, Field, execute_raw_sql
 
 # connect database
-_db_config = {
+db_config = {
     'host': 'localhost',
     'port': 3306,
     'user': 'root',
     'password': '123456',
     'database': 'test'
 }
-Database.connect(**_db_config)
+Database.connect(**db_config)
 
 
 # define model

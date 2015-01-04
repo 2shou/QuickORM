@@ -3,20 +3,20 @@ QuickORM
 
 A simple ORM provides elegant API for Python-MySQL operation
 
-Connect to database
--------------------
+Connect to MySQL
+----------------
 
 ```python
 from data_handler import Database
 
-_db_config = {
+db_config = {
     'host': 'localhost',
     'port': 3306,
     'user': 'root',
     'password': '123456',
     'database': 'test'
 }
-Database.connect(**_db_config)
+Database.connect(**db_config)
 ```
 
 Define a model
