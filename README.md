@@ -1,7 +1,7 @@
 QuickORM
 ========
 
-一个简洁的ORM框架，优雅地使用SQL
+A simple ORM provides elegant API for Python-MySQL operation
 
 Connect to database
 -------------------
@@ -44,7 +44,7 @@ Count
 -----
 
 ```python
-print TestModel.where(a=5, b='join).count()
+print TestModel.where(a=5, b='john').count()
 ```
 
 Update
