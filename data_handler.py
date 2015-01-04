@@ -99,7 +99,9 @@ class Database(object):
 
     @classmethod
     def connect(cls, **db_config):
-        cls.conn = MySQLdb.connect(**db_config)
+        cls.conn = MySQLdb.connect(host=db_config.get('host', 'localhost'), port=db_config.get('port', 3306),
+                                   user=db_config.get('user', 'root'), passwd=db_config.get('password', ''),
+                                   db=db_config.get('database', 'test'))
         cls.conn.autocommit(cls.autocommit)
 
     @classmethod
@@ -124,13 +126,33 @@ class Database(object):
 
 
 if __name__ == '__main__':
+    # connect database
+    db_config = {
+        'host': 'localhost',
+        'port': 3306,
+        'user': 'root',
+        'password': '123456',
+        'database': 'test'
+    }
+    Database.connect(**db_config)
+
+    # define model
     class TestModel(Model):
-        db_table = 'test'
+        db_table = 'test'  # point table name
         a = Field()
         b = Field()
 
+    # create instance
     test = TestModel()
-    test.a = 5
+    test.a = 'john'
     test.b = 3
     test.save()
-    TestModel.where(a=5, b=3).update(a=1)
+
+    # select
+    for r in TestModel.where(a='john', b=3).select():
+        print type(r)
+        print r.a
+        print r.b
+
+    # update
+    TestModel.where(a='john', b=3).update(b=1)
