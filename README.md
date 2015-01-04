@@ -3,44 +3,53 @@ QuickORM
 
 一个简洁的ORM框架，优雅地使用SQL
 
-连接数据库
-----------
+Connect to database
+-------------------
 
-```
+```python
 from data_handler import Database
 Database.connect(host='localhost', port=3306, user='root', passwd='123456')
 ```
 
-定义模型
---------
+Define a model
+--------------
 
-```
+```python
 class TestModel(Model):
   db_table = 'test'
   a = Field()
   b = Field()
 ```
 
-插入
-----
+Insert
+------
 
-```
+```python
 test = TestModel()
 test.a = 5
 test.b = 'john'
 test.save()
 ```
 
-查询
-----
+Query
+-----
 
-```
-TestModel.where(a=5, b='john').select()
+```python
+for r in TestModel.where(a=5, b='john').select():
+  print r.a
+  print r.b
 ```
 
-更新
-----
+Count
+-----
 
+```python
+print TestModel.where(a=5, b='join).count()
 ```
+
+Update
+------
+
+```python
 TestModel.where(a=5, b='john').update(a=1)
 ```

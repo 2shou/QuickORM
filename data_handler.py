@@ -1,8 +1,5 @@
 # coding: utf-8
 
-from numbers import Number
-from datetime import date
-
 import MySQLdb
 
 
@@ -10,57 +7,42 @@ class Field(object):
     pass
 
 
-def normalize(val):
-    if not val or isinstance(val, basestring):
-        return val
-    elif isinstance(val, date):
-        return val.strftime('%Y-%m-%d')
-    elif isinstance(val, Number):
-        return str(val)
-
-
 class Expr(object):
     def __init__(self, model, kwargs):
         self.model = model
-        elst = self.normalize(kwargs)
-        self.wexpr = '' if len(elst) == 0 else 'where %s' % ' and '.join(elst)
+        # How to deal with a non-dict parameter?
+        self.params = kwargs.values()
+        self.where_expr = 'where ' + ' and '.join(self.gen_equation_lst(kwargs.keys()))
 
-    def normalize(self, fdct):
-        def format(x):
-            if isinstance(x, basestring):
-                return '\'%s\'' % x
-            if isinstance(x, date):
-                return '\'%s\'' % x.strftime('%Y-%m-%d')
-            if isinstance(x, Number):
-                return str(x)
-
-        return ['%s = %s' % (key, format(val)) for key, val in fdct.iteritems() if
-                val is not None and key in self.model.fields]
+    @staticmethod
+    def gen_equation_lst(keys):
+        return [key + ' = %s' for key in keys]
 
     def update(self, **kwargs):
-        set_elements = []
-        params = []
+        _keys = []
+        _params = []
         for key, val in kwargs.iteritems():
             if val is None or key not in self.model.fields:
                 continue
-            set_elements.append(key + ' = %s')
-            params.append(format(val))
-        sql = 'update %s set %s %s;' % (self.model.db_table, ', '.join(set_elements), self.wexpr)
-        return Database.execute(sql, params)
+            _keys.append(key)
+            _params.append(val)
+        _params.extend(self.params)
+        sql = 'update %s set %s %s;' % (self.model.db_table, ', '.join(self.gen_equation_lst(_keys)), self.where_expr)
+        return Database.execute(sql, _params)
 
     def select(self):
-        sql = 'select %s from %s %s;' % (', '.join(self.model.fields.keys()), self.model.db_table, self.wexpr)
-        ilst = []
-        for r in Database.execute(sql).fetchall():
+        sql = 'select %s from %s %s;' % (', '.join(self.model.fields.keys()), self.model.db_table, self.where_expr)
+        insts = []
+        for row in Database.execute(sql, self.params).fetchall():
             inst = self.model()
-            for idx, f in enumerate(r):
+            for idx, f in enumerate(row):
                 setattr(inst, self.model.fields.keys()[idx], f)
-            ilst.append(inst)
-        return ilst
+            insts.append(inst)
+        return insts
 
     def count(self):
-        sql = 'select count(*) from %s %s;' % (self.model.db_table, self.wexpr)
-        (row_cnt, ) = Database.execute(sql).fetchone()
+        sql = 'select count(*) from %s %s;' % (self.model.db_table, self.where_expr)
+        (row_cnt, ) = Database.execute(sql, self.params).fetchone()
         return row_cnt
 
 
@@ -82,11 +64,9 @@ class Model(object):
     __metaclass__ = MetaModel
 
     def save(self):
-        rand_field = self.fields.keys()[0]
-        insert = 'insert into %s(%s) values (%s) on duplicate key update %s = %s;' % (
-            self.db_table, ', '.join(self.__dict__.keys()), ', '.join(['%s'] * len(self.__dict__)), rand_field,
-            rand_field)
-        return Database.execute(insert, tuple([normalize(val) for val in self.__dict__.values()]))
+        insert = 'insert ignore into %s(%s) values (%s);' % (
+            self.db_table, ', '.join(self.__dict__.keys()), ', '.join(['%s'] * len(self.__dict__)))
+        return Database.execute(insert, self.__dict__.values())
 
     @classmethod
     def where(cls, **kwargs):
@@ -127,14 +107,14 @@ class Database(object):
 
 if __name__ == '__main__':
     # connect database
-    db_config = {
+    _db_config = {
         'host': 'localhost',
         'port': 3306,
         'user': 'root',
         'password': '123456',
         'database': 'test'
     }
-    Database.connect(**db_config)
+    Database.connect(**_db_config)
 
     # define model
     class TestModel(Model):
