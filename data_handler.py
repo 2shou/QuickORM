@@ -81,7 +81,7 @@ class Database(object):
     def connect(cls, **db_config):
         cls.conn = MySQLdb.connect(host=db_config.get('host', 'localhost'), port=db_config.get('port', 3306),
                                    user=db_config.get('user', 'root'), passwd=db_config.get('password', ''),
-                                   db=db_config.get('database', 'test'))
+                                   db=db_config.get('database', 'test'), charset=db_config.get('charset', 'utf8'))
         cls.conn.autocommit(cls.autocommit)
 
     @classmethod
