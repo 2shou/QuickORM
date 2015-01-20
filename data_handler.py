@@ -12,11 +12,8 @@ class Expr(object):
         self.model = model
         # How to deal with a non-dict parameter?
         self.params = kwargs.values()
-        self.where_expr = 'where ' + ' and '.join(self.gen_equation_lst(kwargs.keys()))
-
-    @staticmethod
-    def gen_equation_lst(keys):
-        return [key + ' = %s' for key in keys]
+        equations = [key + ' = %s' for key in kwargs.keys()]
+        self.where_expr = 'where ' + ' and '.join(equations) if len(equations) > 0 else ''
 
     def update(self, **kwargs):
         _keys = []
@@ -27,7 +24,8 @@ class Expr(object):
             _keys.append(key)
             _params.append(val)
         _params.extend(self.params)
-        sql = 'update %s set %s %s;' % (self.model.db_table, ', '.join(self.gen_equation_lst(_keys)), self.where_expr)
+        sql = 'update %s set %s %s;' % (
+            self.model.db_table, ', '.join([key + ' = %s' for key in _keys]), self.where_expr)
         return Database.execute(sql, _params)
 
     def select(self):
