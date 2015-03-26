@@ -28,8 +28,9 @@ class Expr(object):
             self.model.db_table, ', '.join([key + ' = %s' for key in _keys]), self.where_expr)
         return Database.execute(sql, _params)
 
-    def limit(self, n):
-        self.where_expr += ' limit %s' % n
+    def limit(self, rows, offset=None):
+        self.where_expr += ' limit %s%s' % (
+            '%s, ' % offset if offset is not None else '', rows)
         return self
 
     def select(self):
