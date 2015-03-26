@@ -28,6 +28,10 @@ class Expr(object):
             self.model.db_table, ', '.join([key + ' = %s' for key in _keys]), self.where_expr)
         return Database.execute(sql, _params)
 
+    def limit(self, n):
+        self.where_expr += ' limit %s' % n
+        return self
+
     def select(self):
         sql = 'select %s from %s %s;' % (', '.join(self.model.fields.keys()), self.model.db_table, self.where_expr)
         insts = []

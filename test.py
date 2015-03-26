@@ -24,7 +24,7 @@ test.b = 3
 test.save()
 
 # select
-for r in TestModel.where(a='john', b=3).select():
+for r in TestModel.where(a='john', b=3).limit(1).select():
     print type(r)
     print r.a
     print r.b
