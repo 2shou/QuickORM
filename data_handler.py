@@ -35,13 +35,11 @@ class Expr(object):
 
     def select(self):
         sql = 'select %s from %s %s;' % (', '.join(self.model.fields.keys()), self.model.db_table, self.where_expr)
-        insts = []
         for row in Database.execute(sql, self.params).fetchall():
             inst = self.model()
             for idx, f in enumerate(row):
                 setattr(inst, self.model.fields.keys()[idx], f)
-            insts.append(inst)
-        return insts
+            yield inst
 
     def count(self):
         sql = 'select count(*) from %s %s;' % (self.model.db_table, self.where_expr)
