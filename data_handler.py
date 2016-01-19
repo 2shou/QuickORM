@@ -77,6 +77,7 @@ class Model(object):
 class Database(object):
     autocommit = True
     conn = None
+    db_config = {}
 
     @classmethod
     def connect(cls, **db_config):
@@ -84,15 +85,16 @@ class Database(object):
                                    user=db_config.get('user', 'root'), passwd=db_config.get('password', ''),
                                    db=db_config.get('database', 'test'), charset=db_config.get('charset', 'utf8'))
         cls.conn.autocommit(cls.autocommit)
+        cls.db_config.update(db_config)
 
     @classmethod
     def get_conn(cls):
         if not cls.conn or not cls.conn.open:
-            cls.connect()
+            cls.connect(**cls.db_config)
         try:
             cls.conn.ping()
         except MySQLdb.OperationalError:
-            cls.connect()
+            cls.connect(**cls.db_config)
         return cls.conn
 
     @classmethod
